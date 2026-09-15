@@ -3,14 +3,9 @@ import 'package:flutter/foundation.dart';
 class ApiConstants {
   // Dynamic base URL depending on web host or localhost
   static String get baseUrl {
-    if (kIsWeb) {
-      // Check if running on localhost (dev mode)
-      // In production (Vercel), use relative /api path
-      // In dev mode (localhost:8080 flutter), point to Node server on port 3000
-      return const String.fromEnvironment('API_URL', defaultValue: 'http://localhost:3000/api');
-    }
-    // Mobile / Android emulator URL
-    return 'https://drians.vercel.app/api';
+    // URL API akan di-inject otomatis via GitHub Actions Secret (--dart-define)
+    // Jika tidak ada (misal run lokal), akan fallback ke localhost
+    return const String.fromEnvironment('API_URL', defaultValue: 'http://localhost:3000/api');
   }
 
   // Endpoints

@@ -39,12 +39,12 @@ jobs:
       - name: 🌐 Build Flutter Web
         run: |
           cd frontend
-          flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+          flutter build web --release --base-href "/${{ github.event.repository.name }}/" --dart-define=API_URL=${{ secrets.API_URL }}
 
       - name: 🤖 Build Android APK
         run: |
           cd frontend
-          flutter build apk --release
+          flutter build apk --release --dart-define=API_URL=${{ secrets.API_URL }}
 
       - name: 🚀 Deploy Web to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
