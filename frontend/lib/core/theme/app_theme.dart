@@ -16,7 +16,7 @@ class AppTheme {
         surface: AppColors.surface,
         error: AppColors.accentRed,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: AppColors.cardBg,
         elevation: 0,
         shape: RoundedRectangleBorder(
