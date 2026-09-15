@@ -28,8 +28,13 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.19.6'
+          flutter-version: '3.22.0'
           cache: true
+
+      - name: 🔧 Setup Android local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > frontend/android/local.properties
+          echo "flutter.sdk=$FLUTTER_ROOT" >> frontend/android/local.properties
 
       - name: 📦 Install Flutter Dependencies
         run: |
