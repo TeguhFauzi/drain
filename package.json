@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "node server.js",
     "vercel:dev": "vercel dev",
-    "build": "prisma generate",
     "postinstall": "prisma generate",
     "seed": "node prisma/seed.js",
     "db:push": "prisma db push",

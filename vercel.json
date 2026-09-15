@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "prisma generate",
   "framework": null,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" }
