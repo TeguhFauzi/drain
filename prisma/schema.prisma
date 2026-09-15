@@ -1,0 +1,138 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  email        String        @unique @db.VarChar(255)
+  passwordHash String        @map("password_hash") @db.VarChar(255)
+  name         String        @db.VarChar(255)
+  phone        String?       @db.VarChar(20)
+  role         UserRole      @default(user)
+  balance      Decimal       @default(0) @db.Decimal(15, 2)
+  avatarUrl    String?       @map("avatar_url")
+  isActive     Boolean       @default(true) @map("is_active")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  transactions Transaction[]
+
+  @@map("users")
+}
+
+model Game {
+  id                String    @id @default(uuid()) @db.Uuid
+  name              String    @db.VarChar(255)
+  slug              String    @unique @db.VarChar(255)
+  description       String?
+  imageUrl          String?   @map("image_url")
+  bannerUrl         String?   @map("banner_url")
+  category          String    @default("game") @db.VarChar(100)
+  publisher         String?   @db.VarChar(255)
+  inputLabel        String    @default("User ID") @map("input_label") @db.VarChar(100)
+  inputPlaceholder  String    @default("Masukkan User ID") @map("input_placeholder") @db.VarChar(255)
+  inputLabel2       String?   @map("input_label_2") @db.VarChar(100)
+  inputPlaceholder2 String?   @map("input_placeholder_2") @db.VarChar(255)
+  isActive          Boolean   @default(true) @map("is_active")
+  sortOrder         Int       @default(0) @map("sort_order")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  products          Product[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("games")
+}
+
+model Product {
+  id           String        @id @default(uuid()) @db.Uuid
+  gameId       String        @map("game_id") @db.Uuid
+  name         String        @db.VarChar(255)
+  description  String?
+  price        Decimal       @db.Decimal(15, 2)
+  sellPrice    Decimal       @map("sell_price") @db.Decimal(15, 2)
+  providerCode String?       @map("provider_code") @db.VarChar(100)
+  category     String        @default("topup") @db.VarChar(100)
+  isActive     Boolean       @default(true) @map("is_active")
+  sortOrder    Int           @default(0) @map("sort_order")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  game         Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([gameId])
+  @@index([isActive])
+  @@map("products")
+}
+
+model Transaction {
+  id            String             @id @default(uuid()) @db.Uuid
+  invoiceId     String             @unique @map("invoice_id") @db.VarChar(50)
+  userId        String?            @map("user_id") @db.Uuid
+  productId     String             @map("product_id") @db.Uuid
+  gameUserId    String             @map("game_user_id") @db.VarChar(255)
+  gameServerId  String?            @map("game_server_id") @db.VarChar(100)
+  amount        Decimal            @db.Decimal(15, 2)
+  status        TransactionStatus  @default(pending)
+  paymentMethod String?            @map("payment_method") @db.VarChar(100)
+  paymentUrl    String?            @map("payment_url")
+  paymentId     String?            @map("payment_id") @db.VarChar(255)
+  email         String?            @db.VarChar(255)
+  phone         String?            @db.VarChar(20)
+  notes         String?
+  completedAt   DateTime?          @map("completed_at") @db.Timestamptz
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  user          User?              @relation(fields: [userId], references: [id])
+  product       Product            @relation(fields: [productId], references: [id])
+  paymentLogs   PaymentLog[]
+
+  @@index([userId])
+  @@index([invoiceId])
+  @@index([status])
+  @@map("transactions")
+}
+
+model PaymentLog {
+  id            String      @id @default(uuid()) @db.Uuid
+  transactionId String?     @map("transaction_id") @db.Uuid
+  eventType     String      @map("event_type") @db.VarChar(100)
+  payload       Json?
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+  @@map("payment_logs")
+}
+
+model AdminSetting {
+  key         String   @id @db.VarChar(100)
+  value       String
+  description String?
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("admin_settings")
+}
+
+enum UserRole {
+  user
+  admin
+
+  @@map("user_role")
+}
+
+enum TransactionStatus {
+  pending
+  paid
+  processing
+  completed
+  failed
+  refunded
+
+  @@map("transaction_status")
+}

@@ -1,0 +1,47 @@
+name: Build Android APK Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Flutter Dependencies
+        run: |
+          cd frontend
+          flutter pub get
+
+      - name: Build Android Release APK
+        run: |
+          cd frontend
+          flutter build apk --release --split-per-abi
+
+      - name: Create GitHub Release & Upload APK
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            frontend/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            frontend/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            frontend/build/app/outputs/flutter-apk/app-x86_64-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
